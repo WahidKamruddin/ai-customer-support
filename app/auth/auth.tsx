@@ -4,14 +4,23 @@ import { useEffect, useState } from "react";
 import { auth } from "../firebaseConfig/clientApp";
 
 //Sign in with Google
-export async function googleSignIn(e:any){
-        const provider =  new GoogleAuthProvider();
-        return signInWithPopup(auth, provider);    
+export async function googleSignIn(e: any) {
+    try {
+        const provider = new GoogleAuthProvider();
+        return await signInWithPopup(auth, provider);
+    } catch (error) {
+        console.error("Google Sign-In Error:", error);
+        // Handle the error or show a message to the user
+    }
 } 
 
-//Log out
-export async function logOut(){
-        signOut(auth);
+export async function logOut() {
+    try {
+        await signOut(auth);
+    } catch (error) {
+        console.error("Sign-Out Error:", error);
+        // Handle the error or show a message to the user
+    }
 }
 
 //user

@@ -2,6 +2,8 @@
 
 import { Box, Button, Stack, TextField } from "@mui/material";
 import { useState, useEffect, useRef } from "react";
+import { logOut, useUser } from "./auth/auth";
+import LandingPage from "./LandingPage";
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -81,76 +83,109 @@ export default function Home() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const handleLogOut = async () => {
+    try {
+      await logOut();
+      setUser(null); // Optionally, you can clear the user state
+    } catch (error) {
+      console.error("Error during logout:", error);
+      // Handle the error or display a message
+    }
+  };
+
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  const user = useUser();
+
+  if (!user) {
+    return <LandingPage />;
+  }
+
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-    >
-      <Stack
-        direction={"column"}
-        width="500px"
-        height="700px"
-        border="1px solid black"
-        p={2}
-        spacing={3}
+    <div>
+      <Box
+        display="flex"
+        justifyContent="right"
+        alignItems="center"
+        color="black"
+        p={1}
+      >
+        <Button
+          variant="outlined"
+          onClick={() => handleLogOut()}
+          disabled={isLoading}
+        >
+          Log Out
+        </Button>
+      </Box>
+      <Box
+        width="100vw"
+        height="90vh"
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
       >
         <Stack
           direction={"column"}
-          spacing={2}
-          flexGrow={1}
-          overflow="auto"
-          maxHeight="100%"
+          width="500px"
+          height="700px"
+          border="1px solid black"
+          p={2}
+          spacing={3}
         >
-          {messages.map((message, index) => (
-            <Box
-              key={index}
-              display="flex"
-              justifyContent={
-                message.role === "assistant" ? "flex-start" : "flex-end"
-              }
-            >
-              <Box
-                bgcolor={
-                  message.role === "assistant"
-                    ? "primary.main"
-                    : "secondary.main"
-                }
-                color="white"
-                borderRadius={16}
-                p={3}
-              >
-                {message.content}
-              </Box>
-            </Box>
-          ))}
-          <div ref={messagesEndRef} />
-        </Stack>
-        <Stack direction={"row"} spacing={2}>
-          <TextField
-            label="Message"
-            fullWidth
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-          />
-          <Button
-            variant="contained"
-            onClick={sendMessage}
-            disabled={isLoading}
+          <Stack
+            direction={"column"}
+            spacing={2}
+            flexGrow={1}
+            overflow="auto"
+            maxHeight="100%"
           >
-            {isLoading ? "Sending..." : "Send"}
-          </Button>
+            {messages.map((message, index) => (
+              <Box
+                key={index}
+                display="flex"
+                justifyContent={
+                  message.role === "assistant" ? "flex-start" : "flex-end"
+                }
+              >
+                <Box
+                  bgcolor={
+                    message.role === "assistant"
+                      ? "primary.main"
+                      : "secondary.main"
+                  }
+                  color="white"
+                  borderRadius={16}
+                  p={3}
+                >
+                  {message.content}
+                </Box>
+              </Box>
+            ))}
+            <div ref={messagesEndRef} />
+          </Stack>
+          <Stack direction={"row"} spacing={2}>
+            <TextField
+              label="Message"
+              fullWidth
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={isLoading}
+            />
+            <Button
+              variant="contained"
+              onClick={sendMessage}
+              disabled={isLoading}
+            >
+              {isLoading ? "Sending..." : "Send"}
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
-    </Box>
+      </Box>
+    </div>
   );
 }
